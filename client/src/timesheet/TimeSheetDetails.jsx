@@ -6,15 +6,15 @@ const TimeSheetDetails = ()=>{
   const [timeSheetDetails, setTimeSheetDetails] = useState([]);
 
   useEffect(()=>{
-    axios.get('http://localhost:4004/service/timesheet/SSITimeSheetData')
-    .then((timeSheetDetails)=> setTimeSheetDetails(timeSheetDetails.data.value))
-    .catch((error)=> console.log(error)
-    );
-
-    // axios.get('https://4096ee42trial-dev-timesheet-srv.cfapps.us10-001.hana.ondemand.com/service/timesheet/SSITimeSheetData')
+    // axios.get('http://localhost:4004/service/timesheet/SSITimeSheetData')
     // .then((timeSheetDetails)=> setTimeSheetDetails(timeSheetDetails.data.value))
     // .catch((error)=> console.log(error)
     // );
+
+    axios.get('https://4096ee42trial-dev-timesheet-srv.cfapps.us10-001.hana.ondemand.com/service/timesheet/SSITimeSheetData')
+    .then((timeSheetDetails)=> setTimeSheetDetails(timeSheetDetails.data.value))
+    .catch((error)=> console.log(error));
+    
   }, [])
 
   return (
