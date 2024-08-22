@@ -1,30 +1,35 @@
-const cds = require('@sap/cds')
-const moment = require('moment');
+const cds = require("@sap/cds");
+const moment = require("moment");
 
 // Intitialize custom logic
 class timeSheetSSI extends cds.ApplicationService {
-    async init() {
+  async init() {
+    // Import the entity from 'service.cds'
+    const { SSITimeSheetData } = this.entities;
 
-         // Import the entity from 'service.cds'
-      const { SSIUserDetails, SSITimeSheetData } = this.entities;
+    this.before("*", async (req) => {
+      console.log(req.user);
+    });
 
-      this.before("*", async (req)=>{
-      })
+    this.before("READ", SSITimeSheetData, (req) => {
+      const firstDateOfMonth = moment().startOf("month").format("YYYY-MM-DD");
+      const lastDateOfMonth = moment().endOf("month").format("YYYY-MM-DD");
 
-      this.before('READ', SSITimeSheetData, (req)=>{
-        const firstDateOfMonth = moment().startOf('month').format('YYYY-MM-DD');
-        const lastDateOfMonth = moment().endOf('month').format('YYYY-MM-DD');
+      const condition = {
+        EntryDate: {
+          between: new Date(firstDateOfMonth),
+          and: new Date(lastDateOfMonth),
+        },
+      };
+      req.query.where(condition);
+    });
 
-        const condition = {'EntryDate': {between: new Date(firstDateOfMonth), and: new Date(lastDateOfMonth)}}
-        req.query.where(condition);
-      })
+    this.after("READ", SSITimeSheetData, (data) => {
+      console.log(data);
+    });
 
-      this.after('READ', SSITimeSheetData, (data)=>{
-        console.log(data);
-      })
-       
-        super.init();
-    }
+    super.init();
+  }
 }
 
 module.exports = timeSheetSSI;
