@@ -7,7 +7,14 @@ const TimeSheetDetails = ()=>{
 
   useEffect(()=>{
     axios.get('http://localhost:4004/service/timesheet/SSITimeSheetData')
-    .then((timeSheetDetails)=> setTimeSheetDetails(timeSheetDetails.data.value));
+    .then((timeSheetDetails)=> setTimeSheetDetails(timeSheetDetails.data.value))
+    .catch((error)=> console.log(error)
+    );
+
+    // axios.get('https://4096ee42trial-dev-timesheet-srv.cfapps.us10-001.hana.ondemand.com/service/timesheet/SSITimeSheetData')
+    // .then((timeSheetDetails)=> setTimeSheetDetails(timeSheetDetails.data.value))
+    // .catch((error)=> console.log(error)
+    // );
   }, [])
 
   return (
@@ -26,7 +33,7 @@ const TimeSheetDetails = ()=>{
         <tr key={timeSheetDetail.ID}>
             <td>{timeSheetDetail.EntryDate}</td>
             <td>{timeSheetDetail.Issue}</td>
-            <td>{timeSheetDetail.Enchancement}</td>
+            <td>{timeSheetDetail.Enhancement}</td>
             <td>{timeSheetDetail.NewInnovation}</td>
             <td>{timeSheetDetail.Comments}</td>
             </tr> 

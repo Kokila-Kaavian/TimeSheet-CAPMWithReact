@@ -14,7 +14,7 @@ entity SSITimeSheetData : cuid
 {
     EntryDate : Date;
     Issue : Integer;
-    Enchancement : Integer;
+    Enhancement : Integer;
     NewInnovation : Integer;
     ssiUserDetails : Association to one SSIUserDetails;
     Comments : String(100);
