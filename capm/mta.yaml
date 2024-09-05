@@ -1,0 +1,72 @@
+_schema-version: 3.3.0
+ID: TimeSheet
+version: 1.0.0
+description: "Time sheet app for smartsoft"
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+  - name: TimeSheet-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      readiness-health-check-type: http
+      readiness-health-check-http-endpoint: /health
+    build-parameters:
+      builder: npm
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: TimeSheet-SSI
+      - name: TimeSheet-auth
+      - name: TimeSheet-Postgre-postgres
+
+  - name: TimeSheet-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: TimeSheet-SSI
+
+  - name: TimeSheet-Postgre-postgres-deployer
+    type: nodejs
+    path: gen/pg
+    parameters:
+      buildpack: nodejs_buildpack
+      no-route: true
+      no-start: true
+      tasks:
+        - name: deploy-to-postgresql
+          command: npm start
+    requires:
+      - name: TimeSheet-Postgre-postgres
+
+resources:
+  - name: TimeSheet-SSI
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: TimeSheet-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: TimeSheet-xsuaa-service
+        tenant-mode: dedicated
+  - name: TimeSheet-Postgre-postgres
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: postgresql-db
+      service-plan: development
