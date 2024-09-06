@@ -148,17 +148,14 @@ class timeSheetSSI extends cds.ApplicationService {
       }
     });
 
-    // // Update user active status
+    // Update user active status
     this.on("UPDATE", SSIUserDetails, async(req) => {
       try {
-        // const {token} = req.headers;
-        // const {id} = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-        console.log(req.data);
         
-        await updateActiveStatus(req.data.EmailId);
+        // Call the method to update the active status
+        const message = await updateActiveStatus(req.data.EmailId, req.data.IsActive);
 
-        return ({'message':'Updated Successfully'})
+        return ({message})
       } catch (err) {
         // Handle any errors that occur during this process
         req.error({ status: 500, message: err.message });
