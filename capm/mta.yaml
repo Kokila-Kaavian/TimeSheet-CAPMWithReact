@@ -1,5 +1,5 @@
 _schema-version: 3.3.0
-ID: TimeSheet
+ID: TimeSheet-Postgre
 version: 1.0.0
 description: "Time sheet app for smartsoft"
 parameters:
@@ -11,7 +11,7 @@ build-parameters:
         - npm ci
         - npx cds build --production
 modules:
-  - name: TimeSheet-srv
+  - name: TimeSheet-Postgre-srv
     type: nodejs
     path: gen/srv
     parameters:
@@ -25,17 +25,7 @@ modules:
         properties:
           srv-url: ${default-url}
     requires:
-      - name: TimeSheet-SSI
-      - name: TimeSheet-auth
-      - name: TimeSheet-Postgre-postgres
-
-  - name: TimeSheet-db-deployer
-    type: hdb
-    path: gen/db
-    parameters:
-      buildpack: nodejs_buildpack
-    requires:
-      - name: TimeSheet-SSI
+      - name: postgre-sql-db
 
   - name: TimeSheet-Postgre-postgres-deployer
     type: nodejs
@@ -48,25 +38,11 @@ modules:
         - name: deploy-to-postgresql
           command: npm start
     requires:
-      - name: TimeSheet-Postgre-postgres
+      - name: postgre-sql-db
 
 resources:
-  - name: TimeSheet-SSI
-    type: com.sap.xs.hdi-container
-    parameters:
-      service: hana
-      service-plan: hdi-shared
-  - name: TimeSheet-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: TimeSheet-xsuaa-service
-        tenant-mode: dedicated
-  - name: TimeSheet-Postgre-postgres
+  - name: postgre-sql-db
     type: org.cloudfoundry.managed-service
     parameters:
       service: postgresql-db
-      service-plan: development
+      service-plan: trial
