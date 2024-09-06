@@ -32,7 +32,7 @@ const loginAction = async (loginDetails) => {
       throw new Error("User not found");
     }
 
-    if(user.IsActive === 'N') throw new Error('User can\'t login');
+    if(!user.IsActive) throw new Error('Your account was de-activated. You can\'t login!');
 
     // Compare the hashed password from the database with the provided password
     const isMatch = await bcrypt.compare(password, user.Password);

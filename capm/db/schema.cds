@@ -6,7 +6,7 @@ entity SSIUserDetails
     PersonName : String(100);
     Title : String(100);
     Password: String;
-    IsActive: ActiveStatus default 'Y';
+    IsActive: Boolean default true not null;
     SSITimeSheetData : Association to many SSITimeSheetData on SSITimeSheetData.ssiUserDetails = $self;
 }
 
@@ -16,11 +16,7 @@ entity SSITimeSheetData
     Issue : Integer default 0;
     Enhancement : Integer default 0;
     NewInnovation : Integer default 0;
-    Comments : String(100);
+    Comments : String(500);
     key ssiUserDetails : Association to one SSIUserDetails;
 }
 
-type ActiveStatus : String enum {
-    Yes = 'Y';
-    No = 'N';
-}
