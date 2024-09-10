@@ -6,6 +6,7 @@ import TimeSheetDetails from './timesheet/TimeSheetDetails';
 import User from './user/User';
 import Home from './user/pages/home/Home';
 import Profile from './my_Profile/MyProfile';
+import Maintenance from './maintenance/Maintenance';
 
 import './App.css';
 
@@ -23,6 +24,11 @@ const SessionRoute = ({'element': Component, ...rest}) => {
 }
 
 const App = () => {
+
+  // Checks the application is under maintenance, if it is render maintenance page
+  const isUnderMaintenance = false;
+  if(isUnderMaintenance) return <Maintenance />
+
   return (
     <div className='App'>
       <BrowserRouter>

@@ -19,7 +19,12 @@ const saveAction = async(reqData, id)=>{
     /** Note: In upsert the key ID was not generated */
 
     // Set referenceId (EmailId) to each entry
-    timeSheetDetails.forEach((timeSheetDetail)=> timeSheetDetail.ssiUserDetails_EmailId = id);
+    timeSheetDetails.forEach((timeSheetDetail)=> {
+      timeSheetDetail.ssiUserDetails_EmailId = id;
+      ['Issue', 'NewInnovation', 'Enhancement'].map(key=>{
+        if(timeSheetDetail[key] === null || timeSheetDetail[key] === undefined) timeSheetDetail[key] = 0; 
+      }) 
+    });
 
     await UPSERT.into(SSITimeSheetData, timeSheetDetails);
 

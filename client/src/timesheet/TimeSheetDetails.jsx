@@ -7,8 +7,10 @@ import "./TimeSheetDetails.css";
 
 const TimeSheetDetails = () => {
   const [timeSheetDetails, setTimeSheetDetails] = useState([]);
+  const [existingTimeSheetDetails, setExistingTimeSheetDetails] = useState([]);
   const [tableHeaders, setTableHeaders] = useState([]);
   const [heading, setHeading] = useState("");
+  const [disable, setDisable] = useState(true);
   const [userDetail, setUserDetail] = useState({});
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const month = [
@@ -26,7 +28,7 @@ const TimeSheetDetails = () => {
     "December",
   ];
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token');  
 
   /**
    * Calculate the monthly header using week dates
@@ -61,8 +63,11 @@ const TimeSheetDetails = () => {
           token : token
         }
       })
-      .then((timeSheetDetails) =>
-        setTimeSheetDetails(timeSheetDetails.data.value)
+      .then((response) =>{
+        const timeSheetData = JSON.parse(JSON.stringify(response.data.value));
+        setExistingTimeSheetDetails(response.data.value); // This sets the original data
+        setTimeSheetDetails(timeSheetData); // This sets a deep copy
+      }
       )
       .catch((error) => console.log(error));
 
@@ -104,7 +109,8 @@ const TimeSheetDetails = () => {
       .then((response) => {
         getHeading(response.data.value.weekDates);
         setTableHeaders(response.data.value.weekDates);
-        setTimeSheetDetails(response.data.value.previousWeekData);
+        setExistingTimeSheetDetails(response.data.value.previousWeekData);
+        setTimeSheetDetails(JSON.parse(JSON.stringify(response.data.value.previousWeekData)));
       })
       .catch((error) => console.log(error));
   };
@@ -123,25 +129,39 @@ const TimeSheetDetails = () => {
       .then((response) => {
         getHeading(response.data.value.weekDates);
         setTableHeaders(response.data.value.weekDates);
-        setTimeSheetDetails(response.data.value.nextWeekData);
+        setExistingTimeSheetDetails(response.data.value.nextWeekData);
+        setTimeSheetDetails(JSON.parse(JSON.stringify(response.data.value.nextWeekData)));
       })
       .catch((error) => console.log(error));
   };
 
   // Handler to update the user input 
-  const handleOnChange = (value, index, key) => {
+  const handleOnChange = (value, index, key) => { 
     const preTimeSheetDetails = [...timeSheetDetails];
 
+    const existingValue = timeSheetDetails[index][key]
+    
     preTimeSheetDetails[index][key] = value;
     setTimeSheetDetails(preTimeSheetDetails);
+    
+    if((!existingValue || existingValue !== 0) && value >= 0){
+      setDisable(false);
+    }   
   };
 
   // Handler to store the time-sheet details
   const handleSave = () => {
     // Filter the null records
-    const filteredTimeSheetData = timeSheetDetails.filter((timeSheetDetail)=>{
-      const isTimeSheetDetail = (timeSheetDetail['Issue'] || timeSheetDetail['Enhancement'] || timeSheetDetail['NewInnovation'] || timeSheetDetail['Comments'])
-      if(isTimeSheetDetail) return timeSheetDetail;
+    const filteredTimeSheetData = timeSheetDetails.filter((timeSheetDetail, index)=>{
+      const isTimeSheetDetail = (timeSheetDetail['Issue'] || timeSheetDetail['Enhancement'] || timeSheetDetail['NewInnovation'] || timeSheetDetail['Comments']);
+      /**
+       * Checks if the existing has value.
+       * If it has value and currently its change to 0, its need to be updated
+       */
+      const isExistingTimeSheetDetail = (existingTimeSheetDetails[index]['Issue'] || existingTimeSheetDetails[index]['Enhancement'] || existingTimeSheetDetails[index]['NewInnovation'] || existingTimeSheetDetails[index]['Comments']);
+      
+
+      if(isTimeSheetDetail || isExistingTimeSheetDetail) return timeSheetDetail;
     })
     
     if(filteredTimeSheetData.length > 0){
@@ -155,7 +175,11 @@ const TimeSheetDetails = () => {
         }
       })
       .then((response) => {
-        if(response.data.value.status === 200) toast.success(response.data.value.message);
+        if(response.data.value.status === 200) {
+          toast.success(response.data.value.message);
+          setExistingTimeSheetDetails(JSON.parse(JSON.stringify(timeSheetDetails)));
+          setDisable(true);
+        }
       })
       .catch((error) => console.log(error));
     }
@@ -178,11 +202,6 @@ const TimeSheetDetails = () => {
       }
   })
     return total === 0 ? '' : total;
-  }
-
-  const handleKeyDownInput = (e)=>{
-    console.log(e);
-    
   }
 
   return (
@@ -224,22 +243,18 @@ const TimeSheetDetails = () => {
               </>
             }>
               {["Issue", "Enhancement", "NewInnovation", "Comments", "Total"].map(
-                (key, rowIndex) => (
+                (key) => (
                   <TableRow key={key}>
                     <TableCell>{key === "NewInnovation" ? "Innovation / Other" : key}</TableCell>
-                    {timeSheetDetails?.map((detail, columnIndex) => {
-                      const tabIndex = columnIndex * 4 + rowIndex;
+                    {timeSheetDetails?.map((detail, index) => {
                       
                       return key !== 'Total' ? <TableCell>
                         <Input
                           className="input-box"
-                          onKeyDown={handleKeyDownInput}
-                          // value={tabIndex}
-                          tabIndex={tabIndex}
                           value={!detail[key] ? '' : detail[key]}
                           type={key === "Comments" ? "Text" : "Number"}
-                          onChange={(e) =>
-                            handleOnChange(e.target.value, columnIndex, key)
+                          onInput={(e) =>
+                            handleOnChange(key === "Comments" ? e.target.value : Number(e.target.value), index, key)
                           }
                         ></Input>
                       </TableCell> :
@@ -254,7 +269,7 @@ const TimeSheetDetails = () => {
         </div>
 
         <div className="store-action">
-          <Button design="Emphasized" onClick={handleSave}>
+          <Button design="Emphasized" onClick={handleSave} disabled={disable}>
             Save
           </Button>
         </div>

@@ -1,0 +1,13 @@
+.maintenance-main-container{
+  font-size: 16px;
+  padding: 10px;
+}
+.maintenance-sub-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.maintenance-sub-content{
+  text-align: center;
+}
