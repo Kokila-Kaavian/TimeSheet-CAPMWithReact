@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from 'react-hot-toast';
 
-import { Button, Input, Table, TableCell, TableColumn, TableRow } from '@ui5/webcomponents-react';
+import { Button, Input, Table, TableCell, TableColumn, TableRow, TextArea } from '@ui5/webcomponents-react';
 import "./TimeSheetDetails.css";
 
 const TimeSheetDetails = () => {
@@ -248,16 +248,23 @@ const TimeSheetDetails = () => {
                     <TableCell>{key === "NewInnovation" ? "Innovation / Other" : key}</TableCell>
                     {timeSheetDetails?.map((detail, index) => {
                       
-                      return key !== 'Total' ? <TableCell>
+                      return key !== 'Total' ? key !== 'Comments' ? <TableCell>
                         <Input
                           className="input-box"
                           value={!detail[key] ? '' : detail[key]}
-                          type={key === "Comments" ? "Text" : "Number"}
+                          type={"Number"}
                           onInput={(e) =>
-                            handleOnChange(key === "Comments" ? e.target.value : Number(e.target.value), index, key)
+                            handleOnChange(Number(e.target.value), index, key)
                           }
                         ></Input>
-                      </TableCell> :
+                      </TableCell>:
+                      <TableCell>
+                        <TextArea 
+                        value = {!detail[key] ? '' : detail[key]}
+                        onInput={(e) =>handleOnChange(e.target.value , index, key)}
+                        />
+                      </TableCell>
+                       :
                       <TableCell className="table-cell">{totalHoursCalculation(detail)}</TableCell>
                     })}
                   </TableRow>
